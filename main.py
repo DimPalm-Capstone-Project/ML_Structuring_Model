@@ -12,7 +12,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="Palm Recognition API")
+app = FastAPI(title="Testing Cuyy")
 
 # Initialize preprocessor
 preprocessor = PalmPreprocessor(target_size=(128, 128))
