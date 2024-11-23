@@ -1,0 +1,46 @@
+Palm Print Recognition Test Results
+================================
+
+Total test images: 128
+Correct predictions: 122
+Accuracy: 95.31%
+
+Classification Report:
+              precision    recall  f1-score   support
+
+  person_001       1.00      1.00      1.00         4
+  person_002       1.00      1.00      1.00         4
+  person_003       1.00      1.00      1.00         4
+  person_004       1.00      1.00      1.00         4
+  person_005       1.00      0.75      0.86         4
+  person_006       1.00      0.75      0.86         4
+  person_007       1.00      1.00      1.00         4
+  person_008       1.00      1.00      1.00         4
+  person_009       1.00      0.75      0.86         4
+  person_010       1.00      1.00      1.00         4
+  person_011       1.00      1.00      1.00         4
+  person_012       1.00      0.75      0.86         4
+  person_013       1.00      0.75      0.86         4
+  person_014       1.00      1.00      1.00         4
+  person_015       0.80      1.00      0.89         4
+  person_016       1.00      1.00      1.00         4
+  person_017       0.80      1.00      0.89         4
+  person_018       1.00      1.00      1.00         4
+  person_019       1.00      1.00      1.00         4
+  person_020       1.00      1.00      1.00         4
+  person_021       1.00      0.75      0.86         4
+  person_022       1.00      1.00      1.00         4
+  person_023       1.00      1.00      1.00         4
+  person_024       0.57      1.00      0.73         4
+  person_025       1.00      1.00      1.00         4
+  person_026       1.00      1.00      1.00         4
+  person_027       1.00      1.00      1.00         4
+  person_028       1.00      1.00      1.00         4
+  person_029       1.00      1.00      1.00         4
+  person_030       0.80      1.00      0.89         4
+  person_031       1.00      1.00      1.00         4
+  person_032       1.00      1.00      1.00         4
+
+    accuracy                           0.95       128
+   macro avg       0.97      0.95      0.95       128
+weighted avg       0.97      0.95      0.95       128
