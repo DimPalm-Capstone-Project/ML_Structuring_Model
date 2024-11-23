@@ -1,1 +1,29 @@
-.env/
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+
+# Model files
+src/models/*.h5
+src/models/*.tflite
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Local development
+*.log
+.env
