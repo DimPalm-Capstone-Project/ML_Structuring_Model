@@ -27,3 +27,4 @@ src/models/*.tflite
 # Local development
 *.log
 .env
+.venv
