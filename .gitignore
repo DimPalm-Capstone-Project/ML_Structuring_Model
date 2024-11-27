@@ -20,6 +20,7 @@ ENV/
 # Model files
 src/models/*.h5
 src/models/*.tflite
+model/
 
 # Jupyter Notebook
 .ipynb_checkpoints
