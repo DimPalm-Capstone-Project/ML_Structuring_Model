@@ -11,7 +11,6 @@ def build_base_network(input_shape=(128, 128, 1)):
     """Build the base network for feature extraction"""
     inputs = Input(shape=input_shape)
     
-    # First block
     x = Conv2D(64, (10, 10), activation='relu')(inputs)
     x = MaxPooling2D()(x)
     x = Conv2D(128, (7, 7), activation='relu')(x)
@@ -130,21 +129,20 @@ class PalmPrintRecognizer:
         query_embedding = self.get_embedding(image)
         
         best_match = None
-        best_similarity = -1
+        best_distance = float('inf')
         
         for person_id, stored_embedding in self.embedding_db.items():
-            # Calculate cosine similarity
-            similarity = np.dot(query_embedding, stored_embedding) / \
-                        (np.linalg.norm(query_embedding) * np.linalg.norm(stored_embedding))
+            # Calculate Euclidean distance
+            distance = np.linalg.norm(query_embedding - stored_embedding)
             
-            if similarity > best_similarity:
-                best_similarity = similarity
+            if distance < best_distance:
+                best_distance = distance
                 best_match = person_id
                 
-        if best_similarity < threshold:
-            return None, best_similarity
+        if best_distance > threshold:
+            return None, best_distance
             
-        return best_match, best_similarity
+        return best_match, best_distance
 
 # Example usage
 if __name__ == "__main__":

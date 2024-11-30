@@ -65,6 +65,114 @@ class PalmPreprocessor:
             static_image_mode=True, max_num_hands=1, min_detection_confidence=0.5
         )
 
+    def _check_image_quality(self, roi: np.ndarray) -> Tuple[bool, float, float, str]:
+        """
+        Memeriksa kualitas ROI telapak tangan mencakup kecerahan dan ketajaman
+        
+        Parameters:
+        roi (np.ndarray): Region of Interest telapak tangan dalam format RGB atau grayscale
+        
+        Returns:
+        Tuple[bool, float, float, str]: 
+            - Status validasi (True jika memenuhi syarat)
+            - Nilai kecerahan
+            - Nilai ketajaman
+            - Pesan detail status
+        """
+        # Konversi ke grayscale jika input dalam format RGB
+        if len(roi.shape) == 3:
+            gray = cv2.cvtColor(roi, cv2.COLOR_RGB2GRAY)
+        else:
+            gray = roi
+        
+        # 1. Pemeriksaan Kecerahan
+        brightness = np.mean(gray)
+        
+        # Threshold kecerahan yang sudah disesuaikan untuk telapak tangan
+        BRIGHTNESS_MIN = 100
+        BRIGHTNESS_MAX = 180
+        
+        # Evaluasi status kecerahan
+        if brightness < BRIGHTNESS_MIN:
+            brightness_status = f"Terlalu Gelap ({brightness:.1f} < {BRIGHTNESS_MIN})"
+            is_bright_valid = False
+        elif brightness > BRIGHTNESS_MAX:
+            brightness_status = f"Terlalu Terang ({brightness:.1f} > {BRIGHTNESS_MAX})"
+            is_bright_valid = False
+        else:
+            brightness_status = f"Optimal ({brightness:.1f})"
+            is_bright_valid = True
+        
+        # 2. Pemeriksaan Ketajaman
+        laplacian = cv2.Laplacian(gray, cv2.CV_64F)
+        sharpness = np.var(laplacian)
+        
+        # Threshold ketajaman yang disesuaikan
+        SHARPNESS_VERY_BLUR = 10  # Sangat blur
+        SHARPNESS_MIN = 18        # Minimum yang bisa diterima
+        SHARPNESS_GOOD = 35       # Nilai optimal
+        
+        # Evaluasi status ketajaman
+        if sharpness < SHARPNESS_VERY_BLUR:
+            sharpness_status = f"Sangat Blur ({sharpness:.1f} < {SHARPNESS_VERY_BLUR})"
+            is_sharp_valid = False
+        elif sharpness < SHARPNESS_MIN:
+            sharpness_status = f"Blur ({sharpness:.1f} < {SHARPNESS_MIN})"
+            is_sharp_valid = False
+        else:
+            if sharpness >= SHARPNESS_GOOD:
+                sharpness_status = f"Sangat Tajam ({sharpness:.1f} >= {SHARPNESS_GOOD})"
+            else:
+                sharpness_status = f"Cukup Tajam ({sharpness:.1f} >= {SHARPNESS_MIN})"
+            is_sharp_valid = True
+        
+        # 3. Visualisasi hasil pemeriksaan
+        plt.figure(figsize=(15, 5))
+        
+        # Plot ROI telapak tangan
+        plt.subplot(131)
+        plt.imshow(gray, cmap='gray')
+        status_color = 'green' if (is_bright_valid and is_sharp_valid) else 'red'
+        status_text = "DITERIMA" if (is_bright_valid and is_sharp_valid) else "DITOLAK"
+        plt.title(f'ROI Telapak Tangan\nStatus: {status_text}', color=status_color)
+        plt.axis('off')
+        
+        # Plot histogram kecerahan
+        plt.subplot(132)
+        plt.hist(gray.ravel(), 256, [0, 256], color='gray', alpha=0.7)
+        plt.axvline(brightness, color='r', linestyle='dashed', linewidth=2,
+                    label=f'Kecerahan: {brightness:.1f}')
+        plt.axvline(BRIGHTNESS_MIN, color='g', linestyle='-', linewidth=2,
+                    label=f'Min: {BRIGHTNESS_MIN}')
+        plt.axvline(BRIGHTNESS_MAX, color='g', linestyle='-', linewidth=2,
+                    label=f'Max: {BRIGHTNESS_MAX}')
+        plt.title('Histogram Kecerahan')
+        plt.xlabel('Intensitas Pixel')
+        plt.ylabel('Jumlah Pixel')
+        plt.legend()
+        plt.grid(True, alpha=0.3)
+        
+        # Plot visualisasi ketajaman
+        plt.subplot(133)
+        plt.imshow(np.abs(laplacian), cmap='gray')
+        plt.title(f'Visualisasi Ketajaman\nNilai: {sharpness:.1f}\nMinimum: {SHARPNESS_MIN}')
+        plt.axis('off')
+        
+        plt.tight_layout()
+        plt.show()
+        
+        # 4. Menyusun pesan status lengkap
+        status_message = (
+            f"Status: {status_text}\n"
+            f"Kecerahan: {brightness_status}\n"
+            f"Ketajaman: {sharpness_status}"
+        )
+        
+        # Status akhir: gambar diterima jika memenuhi kedua kriteria
+        is_valid = is_bright_valid and is_sharp_valid
+        
+        return is_valid, brightness, sharpness, status_message
+
     def _initial_resize(self, image: np.ndarray) -> np.ndarray:
         """Resize gambar ke ukuran initial sebelum deteksi landmark"""
         h, w = image.shape[:2]
@@ -196,7 +304,7 @@ class PalmPreprocessor:
             palm_height = max([p[1] for p in palm_points]) - min(
                 [p[1] for p in palm_points]
             )
-            roi_size = int(max(palm_width, palm_height) * 0.9)
+            roi_size = int(max(palm_width, palm_height) * 0.825)
 
             x1 = max(0, center_x - roi_size // 2)
             y1 = max(0, center_y - roi_size // 2)
@@ -419,43 +527,56 @@ class PalmPreprocessor:
         logger.info(f"\nSaved {len(augmented_dict)} images in: person_{person_id}")
         return person_id
 
-    def preprocess_image(
-        self, image_path: Union[str, np.ndarray]
-    ) -> Optional[np.ndarray]:
-        """Main preprocessing function with visualization"""
+    def preprocess_image(self, image_path: Union[str, np.ndarray]) -> Optional[np.ndarray]:
+        """
+        Main preprocessing function dengan pemeriksaan kecerahan setelah ekstraksi ROI
+        """
         try:
             # Load dan tampilkan gambar
             if isinstance(image_path, str):
                 image_rgb = self.load_and_display_image(image_path)
             else:
-                # Jika input adalah array, resize dulu
                 image_rgb = cv2.cvtColor(self._initial_resize(image_path), cv2.COLOR_BGR2RGB)
 
             if image_rgb is None:
                 return None
 
-            # Deteksi landmark
+            # Deteksi landmark dulu
             landmarks, processed_image = self._detect_hand_landmarks(image_rgb)
             if landmarks is None:
                 return None
 
-            # Ekstrak ROI menggunakan processed_image
-            roi, _ = self._extract_palm_roi(processed_image, landmarks)
+            # Ekstrak ROI
+            roi, bbox = self._extract_palm_roi(processed_image, landmarks)
             if roi is None:
                 return None
 
-            # Konversi ke grayscale
-            processed_roi = self._convert_to_grayscale(roi)
-            if processed_roi is None:
+            # Sekarang periksa kecerahan pada ROI yang sudah di-crop
+            is_valid, brightness, sharpness, status = self._check_image_quality(roi)
+            
+            # Hentikan preprocessing jika ROI tidak memenuhi syarat kecerahan
+            if not is_valid:
+                logger.error(status)
+                logger.error("Preprocessing dihentikan karena kualitas gambar tidak memenuhi syarat")
                 return None
 
-            # Resize
-            final_image = self._resize_roi(processed_roi)
-            if final_image is None:
-                return None
-
-            return final_image
+            # Lanjutkan preprocessing jika kecerahan ROI memenuhi syarat
+            logger.info(status)
+            return self._continue_preprocessing(roi)
 
         except Exception as e:
             logger.error(f"Error dalam preprocessing: {str(e)}")
             return None
+            
+    def _continue_preprocessing(self, roi: np.ndarray) -> Optional[np.ndarray]:
+        """
+        Melanjutkan preprocessing dari ROI yang sudah divalidasi kecerahannya
+        """
+        # Konversi ke grayscale
+        processed_roi = self._convert_to_grayscale(roi)
+        if processed_roi is None:
+            return None
+
+        # Resize
+        final_image = self._resize_roi(processed_roi)
+        return final_image
