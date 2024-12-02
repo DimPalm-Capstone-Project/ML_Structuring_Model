@@ -90,7 +90,7 @@ class PalmPreprocessor:
         
         # Threshold kecerahan yang sudah disesuaikan untuk telapak tangan
         BRIGHTNESS_MIN = 100
-        BRIGHTNESS_MAX = 180
+        BRIGHTNESS_MAX = 190
         
         # Evaluasi status kecerahan
         if brightness < BRIGHTNESS_MIN:
