@@ -1,33 +1,33 @@
-# Sistem Pengenalan Telapak Tangan 🖐️
+# Palm Recognition System 🖐️
 
-Sistem pengenalan biometrik berbasis telapak tangan yang menggunakan ROI box extraction dengan MediaPipe. Sistem ini diintegrasikan dengan arsitektur Siamese Neural Network untuk melakukan embedding dan recognition telapak tangan.
+A biometric recognition system based on palm prints using ROI box extraction with MediaPipe. The system is integrated with Siamese Neural Network architecture for palm embedding and recognition.
 
-## 📑 Daftar Isi
+## 📑 Table of Contents
 
-- [Fitur Utama](#fitur-utama)
-- [Visualisasi Preprocessing](#visualisasi-preprocessing)
-- [Tahapan Preprocessing](#tahapan-preprocessing)
-- [Arsitektur Model](#arsitektur-model)
-- [Hasil Model](#hasil-model)
-- [Cara Instalasi](#cara-instalasi)
-- [Limitasi](#limitasi)
-- [Best Practice](#best-practice)
-- [Pengembangan ke Depan](#pengembangan-ke-depan)
+- [Main Features](#-main-features)
+- [Preprocessing Visualization](#-preprocessing-visualization)
+- [Preprocessing Steps](#-preprocessing-steps)
+- [Model Architecture](#-model-architecture)
+- [Model Results](#-model-results)
+- [Installation Guide](#-installation-guide)
+- [Limitations](#-limitations)
+- [Best Practices](#-best-practices)
+- [Future Development](#-future-development)
 
-## 🚀 Fitur Utama
+## 🚀 Main Features
 
-- Deteksi landmark tangan otomatis menggunakan MediaPipe
-- Ekstraksi ROI (Region of Interest) dinamis dengan auto-rotate
-- Quality check otomatis untuk kecerahan dan ketajaman gambar
-- Preprocessing komprehensif dengan visualisasi di setiap tahap
-- Data augmentation otomatis untuk peningkatan dataset
-- Pengenalan telapak tangan menggunakan Siamese Neural Network
-- Sistem embedding database untuk penyimpanan dan pencocokan
-- Visualisasi proses untuk keperluan debugging dan analisis
+- Automatic hand landmark detection using MediaPipe
+- Dynamic ROI (Region of Interest) extraction with auto-rotate
+- Automatic quality check for brightness and sharpness
+- Comprehensive preprocessing with step-by-step visualization
+- Automatic data augmentation for dataset enhancement
+- Palm recognition using Siamese Neural Network
+- Embedding database system for storage and matching
+- Process visualization for debugging and analysis
 
-## 📊 Visualisasi Preprocessing
+## 📊 Preprocessing Visualization
 
-### 1. Deteksi Landmark dan ROI Extraction
+### 1. Landmark Detection and ROI Extraction
 
 ### 2. Quality Check
 
@@ -37,37 +37,37 @@ Sistem pengenalan biometrik berbasis telapak tangan yang menggunakan ROI box ext
 
 <img src="./result/PreprocessedVisual.png" width="800">
 
-## 🔄 Tahapan Preprocessing
+## 🔄 Preprocessing Steps
 
-1. **Input dan Validasi Awal**
+1. **Initial Input and Validation**
 
-   - Resize gambar ke ukuran standar (1280x720)
-   - Validasi kualitas gambar input
+   - Resize image to standard size (1280x720)
+   - Input image quality validation
 
-2. **Deteksi dan Ekstraksi**
+2. **Detection and Extraction**
 
-   - Deteksi landmark tangan dengan MediaPipe
-   - Ekstraksi ROI telapak tangan menggunakan dynamic box
-   - Auto-rotate untuk standardisasi orientasi
+   - Hand landmark detection using MediaPipe
+   - Palm ROI extraction using dynamic box
+   - Auto-rotate for orientation standardization
 
 3. **Quality Check**
 
-   - Evaluasi kecerahan (threshold: 100-180)
-   - Analisis ketajaman (minimum threshold: 8)
-   - Visualisasi metrik kualitas
+   - Brightness evaluation (threshold: 100-180)
+   - Sharpness analysis (minimum threshold: 8)
+   - Quality metrics visualization
 
 4. **Image Enhancement**
 
-   - Konversi ke grayscale
-   - Penghilangan bayangan menggunakan teknik morfologi
-   - Normalisasi kontras dengan CLAHE
+   - Grayscale conversion
+   - Shadow removal using morphological techniques
+   - Contrast normalization with CLAHE
    - Gamma correction
 
-5. **Standardisasi**
-   - Resize ke ukuran 128x128
-   - Normalisasi nilai pixel
+5. **Standardization**
+   - Resize to 128x128
+   - Pixel value normalization
 
-## 🏗️ Arsitektur Model
+## 🏗️ Model Architecture
 
 - **Base Network:**
   ```
@@ -88,20 +88,20 @@ Sistem pengenalan biometrik berbasis telapak tangan yang menggunakan ROI box ext
   Dense(4096, sigmoid)
   ```
 
-## 📈 Hasil Model
+## 📈 Model Results
 
 ### 1. Embedding Visualization
 
 ```
-[Gambar 5: Embedding Space]
-- Visualisasi t-SNE dari embedding telapak tangan
-- Clustering berdasarkan identitas
+[Image 5: Embedding Space]
+- t-SNE visualization of palm embeddings
+- Identity-based clustering
 ```
 
 ### 2. Recognition Results
 
 ```
-[Gambar 6: Recognition Examples]
+[Image 6: Recognition Examples]
 Case 1: Match Found
 - Query Image
 - Best Match
@@ -120,7 +120,7 @@ Case 2: No Match
 - Recall: XX%
 - F1-Score: XX%
 
-## ⚙️ Cara Instalasi
+## ⚙️ Installation Guide
 
 1. Clone repository:
 
@@ -145,63 +145,63 @@ tensorflow>=2.12.0
 matplotlib>=3.7.0
 ```
 
-## ⚠️ Limitasi
+## ⚠️ Limitations
 
-1. **Pencahayaan**
+1. **Lighting**
 
-   - Membutuhkan pencahayaan yang cukup (brightness: 100-180)
-   - Sensitif terhadap bayangan berlebih
+   - Requires adequate lighting (brightness: 100-180)
+   - Sensitive to excessive shadows
 
-2. **Posisi Tangan**
+2. **Hand Position**
 
-   - Telapak tangan harus terbuka penuh
-   - Sudut pengambilan harus relatif tegak lurus
+   - Palm must be fully open
+   - Capture angle must be relatively perpendicular
 
 3. **Hardware**
-   - Membutuhkan kamera dengan minimal 720p
-   - Proses preprocessing membutuhkan CPU/RAM yang memadai
+   - Requires camera with minimum 720p resolution
+   - Preprocessing requires adequate CPU/RAM resources
 
-## 💡 Best Practice
+## 💡 Best Practices
 
-1. **Pengambilan Gambar**
+1. **Image Capture**
 
-   - Gunakan pencahayaan merata
-   - Posisikan tangan tegak lurus dengan kamera
-   - Pastikan telapak tangan terbuka penuh
-   - Hindari background yang kompleks
+   - Use even lighting
+   - Position hand perpendicular to camera
+   - Ensure palm is fully open
+   - Avoid complex backgrounds
 
 2. **Preprocessing**
 
-   - Selalu cek visualisasi quality check
-   - Gunakan augmentasi data untuk variasi dataset
-   - Simpan hasil intermediate untuk debugging
+   - Always check quality visualization
+   - Use data augmentation for dataset variation
+   - Save intermediate results for debugging
 
 3. **Deployment**
-   - Implementasikan sistem caching untuk embedding
-   - Gunakan batch processing untuk optimasi
-   - Monitor resource usage secara berkala
+   - Implement embedding caching system
+   - Use batch processing for optimization
+   - Monitor resource usage regularly
 
-## 🔮 Pengembangan ke Depan
+## 🔮 Future Development
 
-1. **Peningkatan Akurasi**
+1. **Accuracy Improvement**
 
-   - Implementasi multi-scale feature extraction
-   - Integrasi dengan teknik attention
-   - Pengembangan data augmentation yang lebih advanced
+   - Implement multi-scale feature extraction
+   - Integrate attention techniques
+   - Develop more advanced data augmentation
 
-2. **Optimasi**
+2. **Optimization**
 
-   - Implementasi model quantization
-   - Pengembangan lite version untuk mobile
-   - Optimasi preprocessing pipeline
+   - Implement model quantization
+   - Develop lite version for mobile
+   - Optimize preprocessing pipeline
 
-3. **Fitur Tambahan**
+3. **Additional Features**
 
-   - Integrasi dengan sistem anti-spoofing
-   - Pengembangan GUI untuk visualisasi real-time
-   - Implementasi sistem multi-modal recognition
+   - Integration with anti-spoofing system
+   - Development of real-time visualization GUI
+   - Implementation of multi-modal recognition
 
-4. **Keamanan**
-   - Pengembangan enkripsi untuk embedding database
-   - Implementasi secure API endpoints
-   - Pengembangan audit trail system
+4. **Security**
+   - Development of embedding database encryption
+   - Implementation of secure API endpoints
+   - Development of audit trail system
