@@ -403,44 +403,100 @@ class PalmPreprocessor:
             logger.error(f"Error dalam ekstraksi ROI: {str(e)}")
             return None, None
 
+    # def _convert_to_grayscale(self, roi: np.ndarray) -> Optional[np.ndarray]:
+    #     """
+    #     Konversi ke grayscale dengan hasil yang lebih terang
+    #     """
+    #     if roi is None:
+    #         return None
+
+    #     # 1. Konversi ke grayscale
+    #     gray = cv2.cvtColor(roi, cv2.COLOR_RGB2GRAY)
+
+    #     # 2. Normalisasi dengan range yang lebih tinggi untuk hasil lebih terang
+    #     result = cv2.normalize(
+    #         gray,
+    #         None,
+    #         alpha=130,  # nilai minimum dinaikkan
+    #         beta=245,  # nilai maximum dinaikkan
+    #         norm_type=cv2.NORM_MINMAX,
+    #         dtype=cv2.CV_8U,
+    #     )
+
+    #     # Visualization
+    #     plt.figure(figsize=(15, 5))
+    #     images = [roi, gray, result]
+    #     titles = ["Original", "Initial Grayscale", "Final Result"]
+
+    #     for i, (img, title) in enumerate(zip(images, titles)):
+    #         plt.subplot(1, 3, i + 1)
+    #         if i == 0:
+    #             plt.imshow(img)
+    #         else:
+    #             plt.imshow(img, cmap="gray")
+    #         plt.title(title)
+    #         plt.axis("off")
+
+    #     plt.tight_layout()
+    #     plt.show()
+
+    #     return result
+
     def _convert_to_grayscale(self, roi: np.ndarray) -> Optional[np.ndarray]:
-        """
-        Konversi ke grayscale dengan hasil yang lebih terang
-        """
+        """Konversi ke grayscale dengan visualisasi proses"""
         if roi is None:
             return None
 
-        # 1. Konversi ke grayscale
+        # Konversi ke grayscale
         gray = cv2.cvtColor(roi, cv2.COLOR_RGB2GRAY)
 
-        # 2. Normalisasi dengan range yang lebih tinggi untuk hasil lebih terang
-        result = cv2.normalize(
-            gray,
+        # CLAHE pertama
+        clahe = cv2.createCLAHE(clipLimit=1.8, tileGridSize=(8, 8))
+        gray = clahe.apply(gray)
+
+        # Penghilangan bayangan
+        dilated = cv2.dilate(gray, np.ones((5, 5), np.uint8))
+        bg_img = cv2.medianBlur(dilated, 21)
+        diff_img = 255 - cv2.absdiff(gray, bg_img)
+
+        # CLAHE kedua
+        clahe_final = cv2.createCLAHE(clipLimit=1.5, tileGridSize=(8, 8))
+        diff_img = clahe_final.apply(diff_img)
+
+        # Normalisasi
+        normalized = cv2.normalize(
+            diff_img,
             None,
-            alpha=130,  # nilai minimum dinaikkan
-            beta=245,  # nilai maximum dinaikkan
+            alpha=15,
+            beta=240,
             norm_type=cv2.NORM_MINMAX,
-            dtype=cv2.CV_8U,
+            dtype=cv2.CV_8UC1,
         )
 
-        # Visualization
+        # Gamma correction
+        gamma = 1.0
+        normalized = np.array(255 * (normalized / 255) ** gamma, dtype="uint8")
+
+        # Visualisasi
         plt.figure(figsize=(15, 5))
-        images = [roi, gray, result]
-        titles = ["Original", "Initial Grayscale", "Final Result"]
+        plt.subplot(131)
+        plt.imshow(roi)
+        plt.title("ROI Original (RGB)")
+        plt.axis("off")
 
-        for i, (img, title) in enumerate(zip(images, titles)):
-            plt.subplot(1, 3, i + 1)
-            if i == 0:
-                plt.imshow(img)
-            else:
-                plt.imshow(img, cmap="gray")
-            plt.title(title)
-            plt.axis("off")
+        plt.subplot(132)
+        plt.imshow(gray, cmap="gray")
+        plt.title("ROI Grayscale")
+        plt.axis("off")
 
-        plt.tight_layout()
+        plt.subplot(133)
+        plt.imshow(normalized, cmap="gray")
+        plt.title("Grayscale Tanpa Bayangan")
+        plt.axis("off")
+
         plt.show()
 
-        return result
+        return normalized
 
     def _resize_roi(self, enhanced_roi: np.ndarray) -> Optional[np.ndarray]:
         """Resize ROI dengan visualisasi"""
